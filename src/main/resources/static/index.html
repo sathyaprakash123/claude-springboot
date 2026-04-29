@@ -44,6 +44,7 @@
     .card:nth-child(2) { border-color: #667eea; }
     .card:nth-child(3) { border-color: #f5576c; }
     .card:nth-child(4) { border-color: #43e97b; }
+    .card:nth-child(5) { border-color: #f7971e; }
 
     .card h2 {
       font-size: 1rem;
@@ -123,6 +124,29 @@
       color: #c0392b;
       border: 1px solid #fca5a5;
     }
+
+    .word-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 1rem;
+    }
+
+    .word-chip {
+      background: #f0f4ff;
+      color: #3a4ea8;
+      border: 1px solid #c3cef7;
+      border-radius: 20px;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .word-count {
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
   </style>
 </head>
 <body>
@@ -164,6 +188,21 @@
       </div>
       <button onclick="callDate()">Send Request</button>
       <div id="dateResponse" class="response"></div>
+    </div>
+
+    <!-- POST /words -->
+    <div class="card">
+      <h2>POST &nbsp;/words</h2>
+      <div class="field">
+        <label for="wordName">Your Name</label>
+        <input type="text" id="wordName" placeholder="e.g. Alice">
+      </div>
+      <button onclick="callWords()">Find Words</button>
+      <div id="wordsError" class="response"></div>
+      <div id="wordResults" style="display:none">
+        <p class="word-count" id="wordCount"></p>
+        <div class="word-list" id="wordList"></div>
+      </div>
     </div>
   </div>
 
@@ -219,6 +258,50 @@
         showResponse("personResponse", text, res.ok);
       } catch (e) {
         showResponse("personResponse", "Error: " + e.message, false);
+      }
+    }
+
+    async function callWords() {
+      const name = document.getElementById("wordName").value.trim();
+      const errorEl = document.getElementById("wordsError");
+      const resultsEl = document.getElementById("wordResults");
+      const listEl = document.getElementById("wordList");
+      const countEl = document.getElementById("wordCount");
+
+      errorEl.className = "response";
+      resultsEl.style.display = "none";
+      listEl.innerHTML = "";
+
+      if (!name) {
+        showResponse("wordsError", "Please enter a name.", false);
+        return;
+      }
+      try {
+        const res = await fetch("/words", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name })
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          showResponse("wordsError", text, false);
+          return;
+        }
+        const words = await res.json();
+        if (words.length === 0) {
+          showResponse("wordsError", "No words found for the letters in \"" + name + "\".", false);
+          return;
+        }
+        countEl.textContent = words.length + " word" + (words.length === 1 ? "" : "s") + " found from the letters in \"" + name + "\"";
+        words.forEach(w => {
+          const chip = document.createElement("span");
+          chip.className = "word-chip";
+          chip.textContent = w;
+          listEl.appendChild(chip);
+        });
+        resultsEl.style.display = "block";
+      } catch (e) {
+        showResponse("wordsError", "Error: " + e.message, false);
       }
     }
   </script>
