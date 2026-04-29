@@ -43,6 +43,7 @@
 
     .card:nth-child(2) { border-color: #667eea; }
     .card:nth-child(3) { border-color: #f5576c; }
+    .card:nth-child(4) { border-color: #43e97b; }
 
     .card h2 {
       font-size: 1rem;
@@ -153,6 +154,17 @@
       <button onclick="callPerson()">Send Request</button>
       <div id="personResponse" class="response"></div>
     </div>
+
+    <!-- GET /date -->
+    <div class="card">
+      <h2>GET &nbsp;/date</h2>
+      <div class="field">
+        <label for="dateInput">Date (yyyy-MM-dd)</label>
+        <input type="date" id="dateInput">
+      </div>
+      <button onclick="callDate()">Send Request</button>
+      <div id="dateResponse" class="response"></div>
+    </div>
   </div>
 
   <script>
@@ -169,6 +181,21 @@
         showResponse("helloResponse", text, res.ok);
       } catch (e) {
         showResponse("helloResponse", "Error: " + e.message, false);
+      }
+    }
+
+    async function callDate() {
+      const dateVal = document.getElementById("dateInput").value;
+      if (!dateVal) {
+        showResponse("dateResponse", "Please select a date.", false);
+        return;
+      }
+      try {
+        const res = await fetch("/date?date=" + encodeURIComponent(dateVal));
+        const text = await res.text();
+        showResponse("dateResponse", text, res.ok);
+      } catch (e) {
+        showResponse("dateResponse", "Error: " + e.message, false);
       }
     }
 
