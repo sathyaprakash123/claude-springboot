@@ -1,19 +1,24 @@
 package com.example.claudetestspringboot;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/person")
 public class PersonController {
 
+    private final PersonService personService;
+
+    public PersonController(PersonService personService) {
+        this.personService = personService;
+    }
+
     @PostMapping
     public ResponseEntity<String> createPerson(@RequestBody PersonRequest request) {
-        String response = String.format("Received: name=%s, age=%d, gender=%s",
-                request.getName(), request.getAge(), request.getGender());
+        Person saved = personService.savePerson(request);
+        String response = String.format(
+                "Person data successfully stored! ID: %d | Name: %s | Age: %d | Gender: %s",
+                saved.getId(), saved.getName(), saved.getAge(), saved.getGender());
         return ResponseEntity.ok(response);
     }
 }
